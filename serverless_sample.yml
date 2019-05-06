@@ -1,0 +1,45 @@
+service: e2e-liveness-probe
+
+provider:
+  name: aws
+  runtime: python3.7
+  region: ap-northeast-1
+  versionFunctions: false
+  environment:
+    URL_LIST:
+    SLACK_WEBHOOK_URL:
+    BASIC_AUTH_NAME:
+    BASIC_AUTH_PASS:
+
+package:
+  individually: true
+
+functions:
+  check_health:
+    handler: handler.check_health_every_secound
+    memorySize: 128
+    timeout: 90
+    package:
+      exclude:
+        - ./**
+      include:
+        - handler.py
+    events:
+      - schedule: rate(1 minute)
+    layers:
+      - {Ref: BaseLambdaLayer}
+layers:
+  base:
+    path: layer
+    compatibleRuntimes:
+      - python3.7
+    package:
+      include:
+      - layer/**
+
+resources:
+  Resources:
+    NewResource:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: e2e-liveness-probe
