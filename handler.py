@@ -8,7 +8,6 @@ import time
 
 
 webhook_url = os.getenv('SLACK_WEBHOOK_URL')
-payload = {'text': 'hello'}
 
 basic_auth = f"{os.getenv('BASIC_AUTH_NAME')}:{os.getenv('BASIC_AUTH_PASS')}"
 encode=base64.b64encode(basic_auth.encode('utf-8'))
@@ -18,7 +17,7 @@ headers = {"Authorization": f"Basic {encode.decode('utf-8')}"}
 def check_health_every_secound(event, context):
     schedule.every().second.do(check_health)
 
-    while True:
+    for _ in range(60):
         schedule.run_pending()
         time.sleep(1)
 
@@ -31,4 +30,5 @@ async def asyncHttpGet(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as resp:
             if not 200 <= resp.status < 400:
-                session.post(webhook_url, data=json.dumps(payload))
+                payload = {'text': f"url: {url}\nstatus: {resp.status}\nreason: {resp.reason}"}
+                await session.post(webhook_url, data=json.dumps(payload))

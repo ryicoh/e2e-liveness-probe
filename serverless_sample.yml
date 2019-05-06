@@ -27,19 +27,12 @@ functions:
     events:
       - schedule: rate(1 minute)
     layers:
-      - {Ref: BaseLambdaLayer}
+      - {Ref: ModulesLambdaLayer}
 layers:
-  base:
+  modules:
     path: layer
     compatibleRuntimes:
       - python3.7
     package:
       include:
       - layer/**
-
-resources:
-  Resources:
-    NewResource:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: e2e-liveness-probe
